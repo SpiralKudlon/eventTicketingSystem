@@ -1,0 +1,250 @@
+{
+    "info": {
+        "name": "Event Ticketing System API",
+        "description": "API collection for Event Ticketing System - Kenyan Events Platform",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Events",
+            "item": [
+                {
+                    "name": "Get All Events",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8080/api/events",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "events"
+                            ]
+                        },
+                        "description": "Retrieve all available events"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Event by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8080/api/events/1",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "events",
+                                "1"
+                            ]
+                        },
+                        "description": "Retrieve a specific event by ID"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Events by Location",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8080/api/events/location/Nairobi",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "events",
+                                "location",
+                                "Nairobi"
+                            ]
+                        },
+                        "description": "Filter events by location (e.g., Nairobi, Mombasa, Kisumu)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Events by Category",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8080/api/events/category/Technology",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "events",
+                                "category",
+                                "Technology"
+                            ]
+                        },
+                        "description": "Filter events by category (e.g., Technology, Music, Sports)"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Tickets",
+            "item": [
+                {
+                    "name": "Purchase Ticket",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"eventId\": 1,\n  \"userName\": \"John Kamau\",\n  \"userEmail\": \"john.kamau@example.com\",\n  \"phoneNumber\": \"+254700123456\",\n  \"quantity\": 2\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/ticket/purchase",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "ticket",
+                                "purchase"
+                            ]
+                        },
+                        "description": "Purchase tickets for an event"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Ticket by Code",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8080/api/ticket/TKT-ABC12345",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "ticket",
+                                "TKT-ABC12345"
+                            ]
+                        },
+                        "description": "Retrieve ticket details by ticket code"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Test Scenarios",
+            "item": [
+                {
+                    "name": "Purchase Multiple Tickets",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"eventId\": 2,\n  \"userName\": \"Mary Wanjiku\",\n  \"userEmail\": \"mary.wanjiku@example.com\",\n  \"phoneNumber\": \"+254722987654\",\n  \"quantity\": 5\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/ticket/purchase",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "ticket",
+                                "purchase"
+                            ]
+                        },
+                        "description": "Test purchasing multiple tickets at once"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Purchase with Invalid Data",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"eventId\": 1,\n  \"userName\": \"\",\n  \"userEmail\": \"invalid-email\",\n  \"phoneNumber\": \"\",\n  \"quantity\": 0\n}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:8080/api/ticket/purchase",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "ticket",
+                                "purchase"
+                            ]
+                        },
+                        "description": "Test error handling with invalid data"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Non-existent Event",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "http://localhost:8080/api/events/999",
+                            "protocol": "http",
+                            "host": [
+                                "localhost"
+                            ],
+                            "port": "8080",
+                            "path": [
+                                "api",
+                                "events",
+                                "999"
+                            ]
+                        },
+                        "description": "Test 404 error handling"
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ]
+}
