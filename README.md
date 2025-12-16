@@ -18,7 +18,7 @@ Kenyan Currency - All prices displayed in KES (Kenyan Shillings)
 Responsive Design - Mobile-friendly interface with Bootstrap 5  
 RESTful API - Clean separation between frontend and backend  
 
-## 🏗️ Technology Stack
+##  Technology Stack
 
 ### Backend
 - Java 11 - Programming language
