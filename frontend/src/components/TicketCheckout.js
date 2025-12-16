@@ -124,32 +124,33 @@ function TicketCheckout() {
 
     if (loading) {
         return (
-            <Container className="text-center mt-5">
-                <Spinner animation="border" role="status" variant="primary" />
-                <p className="mt-3">Loading event details...</p>
+            <Container className="text-center" style={{ paddingTop: '150px', paddingBottom: '50px' }}>
+                <Spinner animation="border" role="status" variant="primary" style={{ width: '3rem', height: '3rem' }} />
+                <p className="mt-3" style={{ color: '#64748b' }}>Loading event details...</p>
             </Container>
         );
     }
 
     if (!event) {
         return (
-            <Container className="mt-4">
+            <Container style={{ paddingTop: '150px' }}>
                 <Alert variant="danger">Event not found</Alert>
             </Container>
         );
     }
 
     return (
-        <Container className="mt-4 mb-5">
-            <Row>
-                <Col md={6}>
-                    <Card className="shadow-sm mb-4">
-                        <Card.Img
-                            variant="top"
-                            src={event.imageUrl || 'https://via.placeholder.com/600x300?text=Event'}
-                            alt={event.name}
-                            style={{ height: '300px', objectFit: 'cover' }}
-                        />
+        <div style={{ paddingTop: '120px', paddingBottom: '60px', background: '#f8fafc', minHeight: '100vh' }}>
+            <Container>
+                <Row className="g-4">
+                    <Col lg={6}>
+                        <Card className="border-0 overflow-hidden" style={{ borderRadius: '24px', boxShadow: '0 10px 40px rgba(0,0,0,0.1)' }}>
+                            <Card.Img
+                                variant="top"
+                                src={event.imageUrl || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600'}
+                                alt={event.name}
+                                style={{ height: '300px', objectFit: 'cover' }}
+                            />
                         <Card.Body>
                             <Card.Title as="h2">{event.name}</Card.Title>
                             <Card.Text>
@@ -288,7 +289,7 @@ function TicketCheckout() {
                                     </Button>
                                     <Button
                                         variant="outline-secondary"
-                                        onClick={() => navigate('/')}
+                                        onClick={() => navigate('/events')}
                                         disabled={submitting}
                                     >
                                         Cancel
@@ -300,6 +301,7 @@ function TicketCheckout() {
                 </Col>
             </Row>
         </Container>
+        </div>
     );
 }
 

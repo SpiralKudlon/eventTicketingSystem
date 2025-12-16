@@ -46,28 +46,35 @@ function TicketConfirmation() {
     };
 
     return (
-        <Container className="mt-4 mb-5">
-            <div className="text-center mb-4">
-                <div className="text-success mb-3">
-                    <i className="bi bi-check-circle-fill" style={{ fontSize: '4rem' }}></i>
+        <div style={{ paddingTop: '120px', paddingBottom: '60px', background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)', minHeight: '100vh' }}>
+            <Container className="mb-5">
+                <div className="text-center mb-4">
+                    <div style={{ 
+                        width: '100px', 
+                        height: '100px', 
+                        background: 'linear-gradient(135deg, #10b981, #059669)',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        margin: '0 auto 20px',
+                        boxShadow: '0 10px 30px rgba(16, 185, 129, 0.3)'
+                    }}>
+                        <i className="bi bi-check-lg" style={{ fontSize: '3rem', color: 'white' }}></i>
+                    </div>
+                    <h1 style={{ fontSize: '2.5rem', fontWeight: 800 }}>Ticket Purchased Successfully!</h1>
+                    <p className="lead" style={{ color: '#64748b' }}>Your ticket has been confirmed and sent to your email</p>
                 </div>
-                <h1 className="display-4">Ticket Purchased Successfully!</h1>
-                <p className="lead text-muted">Your ticket has been confirmed and sent to your email</p>
-                <Alert variant="success" className="mt-3">
-                    <i className="bi bi-envelope-check me-2"></i>
-                    A confirmation email has been sent to your inbox
-                </Alert>
-            </div>
 
-            <Row className="justify-content-center">
-                <Col md={8} lg={6}>
-                    <Card className="shadow-lg">
-                        <Card.Header className="bg-primary text-white text-center py-3">
-                            <h3 className="mb-0">
-                                <i className="bi bi-ticket-perforated me-2"></i>
-                                E-Ticket
-                            </h3>
-                        </Card.Header>
+                <Row className="justify-content-center">
+                    <Col md={8} lg={6}>
+                        <Card className="border-0" style={{ borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
+                            <Card.Header className="text-white text-center py-4" style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
+                                <h3 className="mb-0" style={{ fontWeight: 700 }}>
+                                    <i className="bi bi-ticket-perforated me-2"></i>
+                                    E-Ticket
+                                </h3>
+                            </Card.Header>
                         <Card.Body className="p-4">
                             <div className="text-center mb-4 p-4 bg-light rounded">
                                 <QRCodeSVG
@@ -146,19 +153,26 @@ function TicketConfirmation() {
 
                             <div className="d-grid gap-2 mt-4">
                                 <Button
-                                    variant="primary"
                                     size="lg"
                                     onClick={() => window.print()}
+                                    style={{ 
+                                        background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                                        border: 'none',
+                                        borderRadius: '12px',
+                                        padding: '14px',
+                                        fontWeight: 600
+                                    }}
                                 >
                                     <i className="bi bi-printer me-2"></i>
                                     Print Ticket
                                 </Button>
                                 <Button
                                     variant="outline-primary"
-                                    onClick={() => navigate('/')}
+                                    onClick={() => navigate('/events')}
+                                    style={{ borderRadius: '12px', padding: '14px', fontWeight: 600 }}
                                 >
-                                    <i className="bi bi-house me-2"></i>
-                                    Back to Events
+                                    <i className="bi bi-calendar-event me-2"></i>
+                                    Browse More Events
                                 </Button>
                             </div>
                         </Card.Body>
@@ -167,11 +181,12 @@ function TicketConfirmation() {
             </Row>
 
             <div className="text-center mt-4">
-                <p className="text-muted">
+                <p style={{ color: '#64748b' }}>
                     Thank you for your purchase! We look forward to seeing you at the event.
                 </p>
             </div>
         </Container>
+        </div>
     );
 }
 

@@ -1,5 +1,7 @@
 package com.codestars.ticketing.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -55,13 +57,14 @@ public class Event {
     private String imageUrl;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Ticket> tickets = new ArrayList<>();
 
     public Event() {
     }
 
-    public Event(String name, String description, String location, LocalDateTime eventDate, 
-                 Double priceKES, Integer totalTickets, String category, String imageUrl) {
+    public Event(String name, String description, String location, LocalDateTime eventDate,
+            Double priceKES, Integer totalTickets, String category, String imageUrl) {
         this.name = name;
         this.description = description;
         this.location = location;

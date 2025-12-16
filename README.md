@@ -10,13 +10,22 @@ This Event Ticketing System is a comprehensive full-stack application designed s
 
 ### Key Features
 
-Event Browsing - View events from Nairobi, Mombasa, Kisumu, and other Kenyan cities  
-Real-time Availability - Live ticket availability tracking  
-Secure Purchasing - Safe and reliable ticket purchase system  
-QR Code Tickets - Automatic generation of scannable QR codes  
-Kenyan Currency - All prices displayed in KES (Kenyan Shillings)  
-Responsive Design - Mobile-friendly interface with Bootstrap 5  
-RESTful API - Clean separation between frontend and backend  
+🎫 **Event Browsing** - View events from Nairobi, Mombasa, Kisumu, and other Kenyan cities  
+📊 **Real-time Availability** - Live ticket availability tracking  
+🔒 **Secure Purchasing** - Safe and reliable ticket purchase system  
+📱 **QR Code Tickets** - Automatic generation of scannable QR codes for entry  
+💰 **Kenyan Currency** - All prices displayed in KES (Kenyan Shillings)  
+📅 **Event Calendar** - Interactive calendar view for event planning  
+🎨 **Modern UI** - Beautiful, responsive design with gradient themes  
+🔍 **Smart Search** - Filter events by category, location, and date  
+📧 **Email Notifications** - Instant ticket confirmation emails  
+🌐 **RESTful API** - Clean separation between frontend and backend  
+
+### User Flow
+1. **Browse Events** → Discover events on the homepage or events page
+2. **Select Event** → View event details and available tickets
+3. **Checkout** → Fill in your details and select quantity
+4. **Get QR Ticket** → Receive instant digital ticket with QR code  
 
 ##  Technology Stack
 
@@ -38,39 +47,72 @@ RESTful API - Clean separation between frontend and backend
 
 ```
 EventTicketingSystem/
-├── backend/                    # Spring Boot backend
+├── backend/                        # Spring Boot backend
 │   ├── src/main/java/com/codestars/ticketing/
 │   │   ├── EventTicketingApplication.java
-│   │   ├── model/             # JPA Entities (User, Event, Ticket)
-│   │   ├── repository/        # Data access layer
-│   │   ├── service/           # Business logic
-│   │   ├── controller/        # REST endpoints
-│   │   └── config/            # Configuration and data loading
+│   │   ├── model/                  # JPA Entities
+│   │   │   ├── User.java
+│   │   │   ├── Event.java
+│   │   │   └── Ticket.java
+│   │   ├── repository/             # Data access layer
+│   │   │   ├── UserRepository.java
+│   │   │   ├── EventRepository.java
+│   │   │   └── TicketRepository.java
+│   │   ├── service/                # Business logic
+│   │   │   ├── TicketService.java
+│   │   │   └── EmailService.java
+│   │   ├── controller/             # REST endpoints
+│   │   │   ├── EventController.java
+│   │   │   ├── TicketController.java
+│   │   │   └── SessionController.java
+│   │   └── config/                 # Configuration
+│   │       └── DataLoader.java
 │   ├── src/main/resources/
 │   │   └── application.properties
 │   ├── pom.xml
 │   └── README-backend.md
 │
-├── frontend/                   # React frontend
+├── frontend/                       # React frontend
 │   ├── src/
-│   │   ├── components/        # React components
-│   │   │   ├── EventList.js
-│   │   │   ├── TicketCheckout.js
-│   │   │   ├── TicketConfirmation.js
-│   │   │   └── Navbar.js
+│   │   ├── components/             # Reusable UI components
+│   │   │   ├── Navbar.js           # Modern navigation header
+│   │   │   ├── Footer.js           # Site footer
+│   │   │   ├── EventCard.js        # Event display card
+│   │   │   ├── EventList.js        # Event listing component
+│   │   │   ├── CheckoutForm.js     # Ticket purchase form
+│   │   │   ├── TicketCheckout.js   # Checkout page component
+│   │   │   ├── TicketConfirmation.js # QR code ticket display
+│   │   │   ├── TicketConfirmationModal.js
+│   │   │   └── SkipLink.js         # Accessibility component
+│   │   ├── pages/                  # Page components
+│   │   │   ├── EventsPage.js       # Events listing with filters
+│   │   │   ├── AboutPage.js        # About us page
+│   │   │   ├── AboutSection.js     # About section component
+│   │   │   ├── ContactPage.js      # Contact form page
+│   │   │   ├── CalendarPage.js     # Event calendar view
+│   │   │   ├── Testimonials.js     # Customer reviews carousel
+│   │   │   └── Newsletter.js       # Email subscription
+│   │   ├── styles/                 # CSS stylesheets
+│   │   │   ├── modern-theme.css    # Modern UI theme
+│   │   │   ├── events-page.css     # Events page styles
+│   │   │   ├── checkout.css        # Checkout page styles
+│   │   │   └── responsive.css      # Mobile responsive styles
 │   │   ├── api/
-│   │   │   └── axiosConfig.js
-│   │   ├── App.js
-│   │   └── index.js
+│   │   │   └── axiosConfig.js      # API configuration
+│   │   ├── App.js                  # Root component with routing
+│   │   ├── index.js                # Entry point
+│   │   ├── theme.css               # Base theme variables
+│   │   └── custom.css              # Custom overrides
 │   ├── public/
+│   │   └── index.html
 │   ├── package.json
 │   └── README-frontend.md
 │
-└── documentation/              # Project documentation
+└── documentation/                  # Project documentation
     ├── Project_Report.md
     ├── Postman_Collection.json
-    ├── ER_Diagram.png
     └── UI_Screenshots/
+        └── README.md
 ```
 
 ## Quick Start
@@ -258,7 +300,12 @@ This project is created for educational purposes as part of Assignment 14.
 
 ## Contributors
 
-- Your Name - Full Stack Developer
+### Founding Team
+- **Kuldon Kiariga** - CEO & Founder
+- **Robinson Crusoe** - CTO
+- **Joseph Chacha** - Head of Operations
+- **Levi Njoroge** - Lead Developer
+- **Gaudencia Omondi** - Marketing Director
 
 ## Support
 
