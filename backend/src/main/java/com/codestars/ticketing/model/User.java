@@ -31,6 +31,7 @@ public class User {
     private String phoneNumber;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Ticket> tickets = new ArrayList<>();
 
     public User() {

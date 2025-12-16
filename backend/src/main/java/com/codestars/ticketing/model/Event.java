@@ -55,6 +55,7 @@ public class Event {
     private String imageUrl;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Ticket> tickets = new ArrayList<>();
 
     public Event() {
