@@ -58,22 +58,22 @@
 <table>
 <tr>
 <td align="center" width="25%">
-<img src="documentation/screenshots/icon-browse.png" width="64" height="64" alt="Browse"/><br>
+<img src="frontend/image1.png" width="64" height="64" alt="Browse"/><br>
 <strong>Browse Events</strong><br>
 <sub>Discover events by category, location, or date</sub>
 </td>
 <td align="center" width="25%">
-<img src="documentation/screenshots/icon-ticket.png" width="64" height="64" alt="Ticket"/><br>
+<img src="frontend/imagw2.png" width="64" height="64" alt="Ticket"/><br>
 <strong>Easy Checkout</strong><br>
 <sub>Seamless ticket purchasing experience</sub>
 </td>
 <td align="center" width="25%">
-<img src="documentation/screenshots/icon-qr.png" width="64" height="64" alt="QR"/><br>
+<img src="frontend/image.png" width="64" height="64" alt="QR"/><br>
 <strong>QR Code Tickets</strong><br>
 <sub>Instant digital tickets on your phone</sub>
 </td>
 <td align="center" width="25%">
-<img src="documentation/screenshots/icon-calendar.png" width="64" height="64" alt="Calendar"/><br>
+<img src="frontend/i2.png" width="64" height="64" alt="Calendar"/><br>
 <strong>Event Calendar</strong><br>
 <sub>Plan your month with calendar view</sub>
 </td>
