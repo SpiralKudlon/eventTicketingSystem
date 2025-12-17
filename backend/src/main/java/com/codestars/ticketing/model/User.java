@@ -8,7 +8,8 @@ import java.util.List;
 
 /**
  * User Entity - Represents a customer in the ticketing system
- * Demonstrates JPA Entity mapping and One-to-Many relationship
+ * Updated for Assignment 14: Added authentication fields and Kenyan context
+ * Demonstrates JPA Entity mapping, One-to-Many relationship, and Spring Security integration
  */
 @Entity
 @Table(name = "users")
@@ -30,6 +31,21 @@ public class User {
     @Column(nullable = false)
     private String phoneNumber;
 
+    // Authentication fields
+    @Column(nullable = true)  // Nullable to support guest checkout
+    private String password;  // BCrypt encrypted password
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role = UserRole.USER;  // Default role
+
+    @Column(nullable = false)
+    private Boolean enabled = true;  // Account status
+
+    // Kenyan Context - Assignment 14 requirement
+    @Column(nullable = true)
+    private String county;  // e.g., "Nairobi", "Mombasa", "Kisumu"
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @com.fasterxml.jackson.annotation.JsonIgnore
     private List<Ticket> tickets = new ArrayList<>();
@@ -41,6 +57,19 @@ public class User {
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;
+        this.role = UserRole.USER;
+        this.enabled = true;
+    }
+
+    // Constructor for authenticated users
+    public User(String name, String email, String phoneNumber, String password, String county) {
+        this.name = name;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.password = password;  // Should be BCrypt encrypted before passing
+        this.county = county;
+        this.role = UserRole.USER;
+        this.enabled = true;
     }
 
     public Long getId() {
@@ -86,6 +115,40 @@ public class User {
     public void addTicket(Ticket ticket) {
         tickets.add(ticket);
         ticket.setUser(this);
+    }
+
+    // Authentication getters and setters
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public UserRole getRole() {
+        return role;
+    }
+
+    public void setRole(UserRole role) {
+        this.role = role;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    // Kenyan context getter and setter
+    public String getCounty() {
+        return county;
+    }
+
+    public void setCounty(String county) {
+        this.county = county;
     }
 
     @Override

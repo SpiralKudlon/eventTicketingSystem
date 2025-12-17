@@ -1,9 +1,13 @@
 package com.codestars.ticketing.config;
 
 import com.codestars.ticketing.model.Event;
+import com.codestars.ticketing.model.User;
+import com.codestars.ticketing.model.UserRole;
 import com.codestars.ticketing.repository.EventRepository;
+import com.codestars.ticketing.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -14,14 +18,24 @@ import java.util.List;
 public class DataLoader implements CommandLineRunner {
 
     private final EventRepository eventRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public DataLoader(EventRepository eventRepository) {
+    public DataLoader(EventRepository eventRepository, 
+                      UserRepository userRepository,
+                      PasswordEncoder passwordEncoder) {
         this.eventRepository = eventRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void run(String... args) throws Exception {
+        // Load test users with Kenyan context
+        loadTestUsers();
+        
+        // Load events
         eventRepository.deleteAll();
 
         List<Event> events = new ArrayList<>();
@@ -141,5 +155,48 @@ public class DataLoader implements CommandLineRunner {
 
         eventRepository.saveAll(events);
         System.out.println("Database initialized with " + eventRepository.count() + " Kenyan events for 2026");
+    }
+
+    /**
+     * Load test users with Kenyan context
+     * Assignment 14: Test accounts for authentication testing
+     */
+    private void loadTestUsers() {
+        userRepository.deleteAll();
+
+        // Test user 1: Regular user from Nairobi
+        User testUser = new User();
+        testUser.setName("John Kamau");
+        testUser.setEmail("test@tiketi.co.ke");
+        testUser.setPassword(passwordEncoder.encode("password123"));
+        testUser.setPhoneNumber("+254712345678");
+        testUser.setCounty("Nairobi");
+        testUser.setRole(UserRole.USER);
+        testUser.setEnabled(true);
+        userRepository.save(testUser);
+
+        // Test user 2: Admin user from Mombasa
+        User adminUser = new User();
+        adminUser.setName("Grace Wanjiku");
+        adminUser.setEmail("admin@tiketi.co.ke");
+        adminUser.setPassword(passwordEncoder.encode("admin123"));
+        adminUser.setPhoneNumber("+254723456789");
+        adminUser.setCounty("Mombasa");
+        adminUser.setRole(UserRole.ADMIN);
+        adminUser.setEnabled(true);
+        userRepository.save(adminUser);
+
+        // Test user 3: User from Kisumu
+        User kisumuUser = new User();
+        kisumuUser.setName("David Ochieng");
+        kisumuUser.setEmail("david@tiketi.co.ke");
+        kisumuUser.setPassword(passwordEncoder.encode("password123"));
+        kisumuUser.setPhoneNumber("0712345678");  // Local format
+        kisumuUser.setCounty("Kisumu");
+        kisumuUser.setRole(UserRole.USER);
+        kisumuUser.setEnabled(true);
+        userRepository.save(kisumuUser);
+
+        System.out.println("Loaded " + userRepository.count() + " test users with Kenyan context");
     }
 }
