@@ -1,0 +1,91 @@
+/* Skeleton Component Styles */
+
+.skeleton {
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Variant Styles */
+.skeleton--text {
+    border-radius: 4px;
+    transform: scale(1, 0.6);
+    transform-origin: 0 60%;
+}
+
+.skeleton--circular {
+    border-radius: 50%;
+}
+
+.skeleton--rectangular {
+    border-radius: 4px;
+}
+
+/* Animation: Pulse */
+.skeleton--pulse {
+    animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Animation: Wave */
+.skeleton--wave {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(90deg,
+            #e0e0e0 0%,
+            #e0e0e0 40%,
+            #f0f0f0 50%,
+            #e0e0e0 60%,
+            #e0e0e0 100%);
+    background-size: 200% 100%;
+    animation: skeleton-wave 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-wave {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .skeleton {
+        background-color: #2a2a2a;
+    }
+
+    .skeleton--wave {
+        background: linear-gradient(90deg,
+                #2a2a2a 0%,
+                #2a2a2a 40%,
+                #3a3a3a 50%,
+                #2a2a2a 60%,
+                #2a2a2a 100%);
+        background-size: 200% 100%;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .skeleton {
+        border-radius: 3px;
+    }
+}

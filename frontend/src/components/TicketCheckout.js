@@ -17,6 +17,7 @@ function TicketCheckout() {
     // Get event from store (cached)
     const getEventById = useEventStore((state) => state.getEventById);
     const fetchEventById = useEventStore((state) => state.fetchEventById);
+    const purchaseTicket = useEventStore((state) => state.purchaseTicket);
 
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -107,7 +108,8 @@ function TicketCheckout() {
                 quantity: parseInt(formData.quantity)
             };
 
-            const response = await axiosInstance.post('/ticket/purchase', purchaseData);
+            // Use store action with optimistic update
+            const ticketData = await purchaseTicket(purchaseData);
 
             // Store user info for confirmation page
             sessionStorage.setItem('userEmail', formData.userEmail);
@@ -118,7 +120,7 @@ function TicketCheckout() {
 
             // Navigate to confirmation
             navigate('/confirmation', {
-                state: { ticketData: response.data }
+                state: { ticketData }
             });
 
         } catch (err) {

@@ -70,10 +70,10 @@ function ModernNavbar() {
                     <div className="d-flex align-items-center gap-3">
                         {isAuthenticated ? (
                             <>
-                                <span className="text-white d-none d-md-inline">
+                                <Link to="/profile" className="text-white d-none d-md-inline text-decoration-none me-3">
                                     <i className="bi bi-person-circle me-2"></i>
                                     {user?.name}
-                                </span>
+                                </Link>
                                 <button
                                     onClick={handleLogout}
                                     className="btn-nav d-none d-md-inline-flex"
@@ -127,10 +127,15 @@ function ModernNavbar() {
 
                         {isAuthenticated ? (
                             <>
-                                <div className="mobile-nav-link" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                                <Link
+                                    to="/profile"
+                                    className="mobile-nav-link text-decoration-none"
+                                    style={{ color: 'rgba(255,255,255,0.7)' }}
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
                                     <i className="bi bi-person-circle me-2"></i>
                                     {user?.name}
-                                </div>
+                                </Link>
                                 <button
                                     onClick={handleLogout}
                                     className="mobile-nav-link w-100 text-start border-0 bg-transparent"

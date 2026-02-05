@@ -1,12 +1,72 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useCallback, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card, Button, Spinner, Alert, Badge, Form, InputGroup } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Alert, Badge, Form, InputGroup } from 'react-bootstrap';
 import useEventStore from '../stores/eventStore';
 import useUIStore from '../stores/uiStore';
+import EventListSkeleton from './skeletons/EventListSkeleton';
 
 /**
- * EventList Component - Refactored to use Zustand event store
- * No more prop drilling, centralized state management
+ * Memoized Event Card Component
+ * Optimized to prevent unnecessary re-renders
+ */
+const EventCardItem = memo(({ event, onBuyClick, formatDate, formatPrice }) => (
+    <Card className="h-100 shadow-sm hover-shadow">
+        <Card.Img
+            variant="top"
+            src={event.imageUrl || 'https://via.placeholder.com/400x200?text=Event'}
+            alt={event.name}
+            style={{ height: '200px', objectFit: 'cover' }}
+            loading="lazy"
+        />
+        <Card.Body className="d-flex flex-column">
+            <div className="mb-2">
+                <Badge bg="primary" className="me-2">
+                    {event.category}
+                </Badge>
+                <Badge bg={event.availableTickets > 0 ? 'success' : 'danger'}>
+                    {event.availableTickets > 0
+                        ? `${event.availableTickets} tickets left`
+                        : 'Sold Out'}
+                </Badge>
+            </div>
+
+            <Card.Title>{event.name}</Card.Title>
+
+            <Card.Text className="text-muted small">
+                <i className="bi bi-geo-alt-fill me-1"></i>
+                {event.location}
+            </Card.Text>
+
+            <Card.Text className="text-muted small">
+                <i className="bi bi-calendar-event me-1"></i>
+                {formatDate(event.eventDate)}
+            </Card.Text>
+
+            <Card.Text className="flex-grow-1">
+                {event.description.substring(0, 100)}...
+            </Card.Text>
+
+            <div className="d-flex justify-content-between align-items-center mt-auto">
+                <h4 className="text-primary mb-0">
+                    {formatPrice(event.priceKES)}
+                </h4>
+                <Button
+                    variant="primary"
+                    onClick={() => onBuyClick(event.id)}
+                    disabled={event.availableTickets === 0}
+                >
+                    {event.availableTickets > 0 ? 'Buy Ticket' : 'Sold Out'}
+                </Button>
+            </div>
+        </Card.Body>
+    </Card>
+));
+
+/**
+ * EventList Component - Refactored with Optimizations
+ * - Uses Zustand event store
+ * - Implements Loading Skeletons
+ * - Uses React.memo and useCallback
  */
 function EventList() {
     const navigate = useNavigate();
@@ -52,7 +112,8 @@ function EventList() {
         }
     }, [error, showError]);
 
-    const formatDate = (dateString) => {
+    // Memoize formatters
+    const formatDate = useCallback((dateString) => {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-KE', {
             weekday: 'long',
@@ -62,18 +123,18 @@ function EventList() {
             hour: '2-digit',
             minute: '2-digit'
         });
-    };
+    }, []);
 
-    const formatPrice = (price) => {
+    const formatPrice = useCallback((price) => {
         return new Intl.NumberFormat('en-KE', {
             style: 'currency',
             currency: 'KES'
         }).format(price);
-    };
+    }, []);
 
-    const handleBuyTicket = (eventId) => {
+    const handleBuyTicket = useCallback((eventId) => {
         navigate(`/checkout/${eventId}`);
-    };
+    }, [navigate]);
 
     const handleRetry = () => {
         clearError();
@@ -82,11 +143,12 @@ function EventList() {
 
     if (loading && events.length === 0) {
         return (
-            <Container className="text-center mt-5">
-                <Spinner animation="border" role="status" variant="primary">
-                    <span className="visually-hidden">Loading...</span>
-                </Spinner>
-                <p className="mt-3">Loading events...</p>
+            <Container className="mt-4">
+                <div className="text-center mb-4">
+                    <h1 className="display-4">Upcoming Events in Kenya</h1>
+                    <p className="lead text-muted">Discover and book tickets for amazing events across Kenya</p>
+                </div>
+                <EventListSkeleton count={6} />
             </Container>
         );
     }
@@ -211,55 +273,12 @@ function EventList() {
                 <Row>
                     {filteredEvents.map((event) => (
                         <Col key={event.id} md={6} lg={4} className="mb-4">
-                            <Card className="h-100 shadow-sm hover-shadow">
-                                <Card.Img
-                                    variant="top"
-                                    src={event.imageUrl || 'https://via.placeholder.com/400x200?text=Event'}
-                                    alt={event.name}
-                                    style={{ height: '200px', objectFit: 'cover' }}
-                                />
-                                <Card.Body className="d-flex flex-column">
-                                    <div className="mb-2">
-                                        <Badge bg="primary" className="me-2">
-                                            {event.category}
-                                        </Badge>
-                                        <Badge bg={event.availableTickets > 0 ? 'success' : 'danger'}>
-                                            {event.availableTickets > 0
-                                                ? `${event.availableTickets} tickets left`
-                                                : 'Sold Out'}
-                                        </Badge>
-                                    </div>
-
-                                    <Card.Title>{event.name}</Card.Title>
-
-                                    <Card.Text className="text-muted small">
-                                        <i className="bi bi-geo-alt-fill me-1"></i>
-                                        {event.location}
-                                    </Card.Text>
-
-                                    <Card.Text className="text-muted small">
-                                        <i className="bi bi-calendar-event me-1"></i>
-                                        {formatDate(event.eventDate)}
-                                    </Card.Text>
-
-                                    <Card.Text className="flex-grow-1">
-                                        {event.description.substring(0, 100)}...
-                                    </Card.Text>
-
-                                    <div className="d-flex justify-content-between align-items-center mt-auto">
-                                        <h4 className="text-primary mb-0">
-                                            {formatPrice(event.priceKES)}
-                                        </h4>
-                                        <Button
-                                            variant="primary"
-                                            onClick={() => handleBuyTicket(event.id)}
-                                            disabled={event.availableTickets === 0}
-                                        >
-                                            {event.availableTickets > 0 ? 'Buy Ticket' : 'Sold Out'}
-                                        </Button>
-                                    </div>
-                                </Card.Body>
-                            </Card>
+                            <EventCardItem
+                                event={event}
+                                onBuyClick={handleBuyTicket}
+                                formatDate={formatDate}
+                                formatPrice={formatPrice}
+                            />
                         </Col>
                     ))}
                 </Row>

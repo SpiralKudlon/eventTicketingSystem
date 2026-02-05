@@ -162,6 +162,38 @@ const useEventStore = create(
                     get().fetchEvents(true);
                 },
 
+                // Purchase Ticket with Optimistic Update
+                purchaseTicket: async (ticketData) => {
+                    const { events } = get();
+                    const { eventId, quantity } = ticketData;
+
+                    // 1. Optimistic Update
+                    const previousEvents = [...events];
+                    set({
+                        events: events.map(event =>
+                            event.id === eventId
+                                ? { ...event, availableTickets: event.availableTickets - quantity }
+                                : event
+                        )
+                    });
+
+                    try {
+                        // 2. Perform API Call
+                        const response = await axiosInstance.post('/ticket/purchase', ticketData);
+
+                        // 3. Success - Invalidate specific event or refresh if needed
+                        // For now, we trust our calculation, but we could re-fetch to be sure
+                        // set((state) => ({ events: state.events.map(...) })) // update with server response if it returns updated event
+
+                        return response.data;
+                    } catch (error) {
+                        // 4. Rollback on Failure
+                        set({ events: previousEvents });
+                        console.error('Purchase failed, rolling back:', error);
+                        throw error;
+                    }
+                },
+
                 // Clear error
                 clearError: () => set({ error: null }),
             }),
