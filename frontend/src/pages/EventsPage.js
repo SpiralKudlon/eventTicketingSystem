@@ -1,114 +1,64 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import axiosInstance from '../api/axiosConfig';
+import useEventStore from '../stores/eventStore';
+import useUIStore from '../stores/uiStore';
 
 /**
- * EventsPage Component - Modern event listing with filters
+ * EventsPage Component - Refactored to use event store
+ * Modern event listing with filters - no duplicate API calls!
  */
 function EventsPage() {
-    const [events, setEvents] = useState([]);
-    const [filteredEvents, setFilteredEvents] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [locations, setLocations] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    const [searchParams] = useSearchParams();
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'All');
-    const [selectedLocation, setSelectedLocation] = useState('All');
-    const [sortBy, setSortBy] = useState('date-asc');
-
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const { showError } = useUIStore();
 
-    const fetchEvents = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-            const response = await axiosInstance.get('/events');
-            setEvents(response.data);
-        } catch (err) {
-            setError('Failed to load events. Please make sure the backend server is running.');
-            console.error('Error fetching events:', err);
-        } finally {
-            setLoading(false);
+    // Get state and actions from event store
+    const {
+        loading,
+        error,
+        searchQuery,
+        selectedCategory,
+        selectedLocation,
+        sortBy,
+        categories,
+        locations,
+        fetchEvents,
+        fetchCategories,
+        fetchLocations,
+        getFilteredEvents,
+        setSearchQuery,
+        setSelectedCategory,
+        setSelectedLocation,
+        setSortBy,
+        clearFilters,
+        clearError,
+    } = useEventStore();
+
+    // Get events
+    const events = useEventStore((state) => state.events);
+    const filteredEvents = getFilteredEvents();
+
+    // Initialize category from URL params
+    useEffect(() => {
+        const categoryParam = searchParams.get('category');
+        if (categoryParam) {
+            setSelectedCategory(categoryParam);
         }
-    };
+    }, [searchParams, setSelectedCategory]);
 
-    const fetchCategories = async () => {
-        try {
-            const response = await axiosInstance.get('/events/categories');
-            setCategories(response.data);
-        } catch (err) {
-            console.error('Error fetching categories:', err);
-        }
-    };
-
-    const fetchLocations = async () => {
-        try {
-            const response = await axiosInstance.get('/events/locations');
-            setLocations(response.data);
-        } catch (err) {
-            console.error('Error fetching locations:', err);
-        }
-    };
-
-    const filterAndSortEvents = useCallback(() => {
-        let filtered = [...events];
-
-        if (searchQuery.trim()) {
-            const query = searchQuery.toLowerCase();
-            filtered = filtered.filter(event =>
-                event.name.toLowerCase().includes(query) ||
-                event.location.toLowerCase().includes(query) ||
-                event.description.toLowerCase().includes(query)
-            );
-        }
-
-        if (selectedCategory !== 'All') {
-            filtered = filtered.filter(event => event.category === selectedCategory);
-        }
-
-        if (selectedLocation !== 'All') {
-            filtered = filtered.filter(event => event.location.includes(selectedLocation));
-        }
-
-        filtered.sort((a, b) => {
-            switch (sortBy) {
-                case 'date-asc':
-                    return new Date(a.eventDate) - new Date(b.eventDate);
-                case 'date-desc':
-                    return new Date(b.eventDate) - new Date(a.eventDate);
-                case 'price-asc':
-                    return a.priceKES - b.priceKES;
-                case 'price-desc':
-                    return b.priceKES - a.priceKES;
-                case 'availability':
-                    return b.availableTickets - a.availableTickets;
-                default:
-                    return 0;
-            }
-        });
-
-        setFilteredEvents(filtered);
-    }, [events, searchQuery, selectedCategory, selectedLocation, sortBy]);
-
+    // Fetch data on mount
     useEffect(() => {
         fetchEvents();
         fetchCategories();
         fetchLocations();
-    }, []);
+    }, [fetchEvents, fetchCategories, fetchLocations]);
 
+    // Show error toast if error occurs
     useEffect(() => {
-        filterAndSortEvents();
-    }, [filterAndSortEvents]);
-
-    const clearFilters = () => {
-        setSearchQuery('');
-        setSelectedCategory('All');
-        setSelectedLocation('All');
-        setSortBy('date-asc');
-    };
+        if (error) {
+            showError(error);
+        }
+    }, [error, showError]);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -147,7 +97,12 @@ function EventsPage() {
         navigate(`/checkout/${eventId}`);
     };
 
-    if (loading) {
+    const handleRetry = () => {
+        clearError();
+        fetchEvents(true); // Force refresh
+    };
+
+    if (loading && events.length === 0) {
         return (
             <div className="events-page" style={{ paddingTop: '120px' }}>
                 <div className="container">
@@ -162,7 +117,7 @@ function EventsPage() {
         );
     }
 
-    if (error) {
+    if (error && events.length === 0) {
         return (
             <div className="events-page" style={{ paddingTop: '120px' }}>
                 <div className="container">
@@ -170,7 +125,7 @@ function EventsPage() {
                         <i className="bi bi-exclamation-triangle" style={{ fontSize: '4rem', color: '#ef4444' }}></i>
                         <h3 className="mt-3">Error Loading Events</h3>
                         <p style={{ color: '#64748b' }}>{error}</p>
-                        <button className="btn-gradient" onClick={fetchEvents}>
+                        <button className="btn-gradient" onClick={handleRetry}>
                             <i className="bi bi-arrow-clockwise me-2"></i>
                             Try Again
                         </button>
@@ -189,8 +144,8 @@ function EventsPage() {
                         <i className="bi bi-calendar-event me-2"></i>
                         Discover Events
                     </span>
-                    <h1 style={{ 
-                        fontSize: 'clamp(2rem, 4vw, 3rem)', 
+                    <h1 style={{
+                        fontSize: 'clamp(2rem, 4vw, 3rem)',
                         fontWeight: 800,
                         marginTop: '16px',
                         marginBottom: '16px'
@@ -294,8 +249,8 @@ function EventsPage() {
                                 <div key={event.id} className="col-md-6 col-lg-4">
                                     <div className="event-card-modern">
                                         <div className="event-card-image">
-                                            <img 
-                                                src={event.imageUrl || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600'} 
+                                            <img
+                                                src={event.imageUrl || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600'}
                                                 alt={event.name}
                                             />
                                             <div className="event-card-badge">
@@ -335,7 +290,7 @@ function EventsPage() {
                                                     <span className="currency">From </span>
                                                     <span className="amount">{formatPrice(event.priceKES)}</span>
                                                 </div>
-                                                <button 
+                                                <button
                                                     className="btn-buy-ticket"
                                                     onClick={() => handleBuyTicket(event.id)}
                                                     disabled={event.availableTickets === 0}

@@ -1,10 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import useEventStore from '../stores/eventStore';
 
 /**
- * EventCalendar Component - Interactive calendar showing events
+ * EventCalendar Component - Refactored to use event store
+ * Interactive calendar showing events
  */
-function EventCalendar({ events = [] }) {
+function EventCalendar() {
     const [currentDate, setCurrentDate] = useState(new Date());
+
+    // Get events from store
+    const { events, fetchEvents } = useEventStore();
+
+    useEffect(() => {
+        fetchEvents(); // Uses cache if available
+    }, [fetchEvents]);
 
     const months = [
         'January', 'February', 'March', 'April', 'May', 'June',
@@ -46,7 +55,7 @@ function EventCalendar({ events = [] }) {
 
     // Generate calendar days
     const calendarDays = [];
-    
+
     // Previous month days
     const prevMonthDays = getDaysInMonth(year, month - 1);
     for (let i = firstDay - 1; i >= 0; i--) {
@@ -92,7 +101,7 @@ function EventCalendar({ events = [] }) {
                             </span>
                             <h2 className="section-title">Upcoming Events Schedule</h2>
                             <p className="section-description">
-                                Plan ahead and never miss an event. Browse our calendar to see 
+                                Plan ahead and never miss an event. Browse our calendar to see
                                 what's coming up in Kenya's vibrant events scene.
                             </p>
                         </div>

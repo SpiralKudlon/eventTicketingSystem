@@ -1,11 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useEventStore from '../stores/eventStore';
 
 /**
- * FeaturedEvents Component - Showcase top events with modern cards
+ * FeaturedEvents Component - Refactored to use event store
+ * Showcase top events with modern cards
  */
-function FeaturedEvents({ events = [], loading = false }) {
+function FeaturedEvents() {
     const navigate = useNavigate();
+
+    // Get events from store
+    const { events, loading, fetchEvents } = useEventStore();
+
+    useEffect(() => {
+        fetchEvents(); // Uses cache if available
+    }, [fetchEvents]);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -39,7 +48,7 @@ function FeaturedEvents({ events = [], loading = false }) {
     // Get featured events (first 6)
     const featuredEvents = events.slice(0, 6);
 
-    if (loading) {
+    if (loading && events.length === 0) {
         return (
             <section className="section featured-events">
                 <div className="container">
@@ -80,7 +89,7 @@ function FeaturedEvents({ events = [], loading = false }) {
                     </span>
                     <h2 className="section-title">Featured Events This Month</h2>
                     <p className="section-description">
-                        Don't miss out on the hottest events happening across Kenya. 
+                        Don't miss out on the hottest events happening across Kenya.
                         Get your tickets now before they sell out!
                     </p>
                 </div>
@@ -94,8 +103,8 @@ function FeaturedEvents({ events = [], loading = false }) {
                             <div key={event.id} className="col-md-6 col-lg-4">
                                 <div className="event-card-modern">
                                     <div className="event-card-image">
-                                        <img 
-                                            src={event.imageUrl || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600'} 
+                                        <img
+                                            src={event.imageUrl || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600'}
                                             alt={event.name}
                                         />
                                         <div className="event-card-badge">
@@ -135,7 +144,7 @@ function FeaturedEvents({ events = [], loading = false }) {
                                                 <span className="currency">From </span>
                                                 <span className="amount">{formatPrice(event.priceKES)}</span>
                                             </div>
-                                            <button 
+                                            <button
                                                 className="btn-buy-ticket"
                                                 onClick={() => handleBuyTicket(event.id)}
                                                 disabled={event.availableTickets === 0}

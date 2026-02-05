@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import axiosInstance from '../api/axiosConfig';
+import React from 'react';
 
 import HeroSection from './HeroSection';
 import FeaturedEvents from './FeaturedEvents';
@@ -10,34 +9,17 @@ import Testimonials from './Testimonials';
 import Newsletter from './Newsletter';
 
 /**
- * HomePage Component - Modern landing page with all sections
+ * HomePage Component - Refactored to use event store
+ * Modern landing page with all sections - no prop drilling!
  */
 function HomePage() {
-    const [events, setEvents] = useState([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchEvents = async () => {
-            try {
-                setLoading(true);
-                const response = await axiosInstance.get('/events');
-                setEvents(response.data);
-            } catch (err) {
-                console.error('Error fetching events:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchEvents();
-    }, []);
-
+    // No need to fetch events here - child components use the store directly
     return (
         <div className="home-page">
             <HeroSection />
-            <FeaturedEvents events={events} loading={loading} />
+            <FeaturedEvents />
             <Categories />
-            <EventCalendar events={events} />
+            <EventCalendar />
             <AboutSection />
             <Testimonials />
             <Newsletter />
