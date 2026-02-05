@@ -15,6 +15,7 @@ import ModernFooter from './components/ModernFooter';
 import HomePage from './components/HomePage';
 import TicketCheckout from './components/TicketCheckout';
 import TicketConfirmation from './components/TicketConfirmation';
+import ToastNotification from './components/ToastNotification';
 
 // Pages
 import EventsPage from './pages/EventsPage';
@@ -29,6 +30,7 @@ function App() {
         <AuthProvider>
             <Router>
                 <SkipLink />
+                <ToastNotification />
                 <div className="App">
                     <ModernNavbar />
                     <main id="main-content">
@@ -52,3 +54,4 @@ function App() {
 }
 
 export default App;
+

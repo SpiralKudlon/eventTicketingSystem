@@ -1,111 +1,56 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Spinner, Alert, Badge, Form, InputGroup } from 'react-bootstrap';
-import axiosInstance from '../api/axiosConfig';
+import useEventStore from '../stores/eventStore';
+import useUIStore from '../stores/uiStore';
 
+/**
+ * EventList Component - Refactored to use Zustand event store
+ * No more prop drilling, centralized state management
+ */
 function EventList() {
-    const [events, setEvents] = useState([]);
-    const [filteredEvents, setFilteredEvents] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [locations, setLocations] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('All');
-    const [selectedLocation, setSelectedLocation] = useState('All');
-    const [sortBy, setSortBy] = useState('date-asc');
-
     const navigate = useNavigate();
+    const { showError } = useUIStore();
 
-    const fetchEvents = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-            const response = await axiosInstance.get('/events');
-            setEvents(response.data);
-        } catch (err) {
-            setError('Failed to load events. Please make sure the backend server is running.');
-            console.error('Error fetching events:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // Get state and actions from event store
+    const {
+        loading,
+        error,
+        searchQuery,
+        selectedCategory,
+        selectedLocation,
+        sortBy,
+        categories,
+        locations,
+        fetchEvents,
+        fetchCategories,
+        fetchLocations,
+        getFilteredEvents,
+        setSearchQuery,
+        setSelectedCategory,
+        setSelectedLocation,
+        setSortBy,
+        clearFilters,
+        clearError,
+    } = useEventStore();
 
-    const fetchCategories = async () => {
-        try {
-            const response = await axiosInstance.get('/events/categories');
-            setCategories(response.data);
-        } catch (err) {
-            console.error('Error fetching categories:', err);
-        }
-    };
+    // Get filtered events
+    const events = useEventStore((state) => state.events);
+    const filteredEvents = getFilteredEvents();
 
-    const fetchLocations = async () => {
-        try {
-            const response = await axiosInstance.get('/events/locations');
-            setLocations(response.data);
-        } catch (err) {
-            console.error('Error fetching locations:', err);
-        }
-    };
-
-    const filterAndSortEvents = useCallback(() => {
-        let filtered = [...events];
-
-        if (searchQuery.trim()) {
-            const query = searchQuery.toLowerCase();
-            filtered = filtered.filter(event =>
-                event.name.toLowerCase().includes(query) ||
-                event.location.toLowerCase().includes(query) ||
-                event.description.toLowerCase().includes(query)
-            );
-        }
-
-        if (selectedCategory !== 'All') {
-            filtered = filtered.filter(event => event.category === selectedCategory);
-        }
-
-        if (selectedLocation !== 'All') {
-            filtered = filtered.filter(event => event.location.includes(selectedLocation));
-        }
-
-        filtered.sort((a, b) => {
-            switch (sortBy) {
-                case 'date-asc':
-                    return new Date(a.eventDate) - new Date(b.eventDate);
-                case 'date-desc':
-                    return new Date(b.eventDate) - new Date(a.eventDate);
-                case 'price-asc':
-                    return a.priceKES - b.priceKES;
-                case 'price-desc':
-                    return b.priceKES - a.priceKES;
-                case 'availability':
-                    return b.availableTickets - a.availableTickets;
-                default:
-                    return 0;
-            }
-        });
-
-        setFilteredEvents(filtered);
-    }, [events, searchQuery, selectedCategory, selectedLocation, sortBy]);
-
+    // Fetch data on mount
     useEffect(() => {
         fetchEvents();
         fetchCategories();
         fetchLocations();
-    }, []);
+    }, [fetchEvents, fetchCategories, fetchLocations]);
 
+    // Show error toast if error occurs
     useEffect(() => {
-        filterAndSortEvents();
-    }, [filterAndSortEvents]);
-
-    const clearFilters = () => {
-        setSearchQuery('');
-        setSelectedCategory('All');
-        setSelectedLocation('All');
-        setSortBy('date-asc');
-    };
+        if (error) {
+            showError(error);
+        }
+    }, [error, showError]);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -130,7 +75,12 @@ function EventList() {
         navigate(`/checkout/${eventId}`);
     };
 
-    if (loading) {
+    const handleRetry = () => {
+        clearError();
+        fetchEvents(true); // Force refresh
+    };
+
+    if (loading && events.length === 0) {
         return (
             <Container className="text-center mt-5">
                 <Spinner animation="border" role="status" variant="primary">
@@ -141,13 +91,13 @@ function EventList() {
         );
     }
 
-    if (error) {
+    if (error && events.length === 0) {
         return (
             <Container className="mt-4">
                 <Alert variant="danger">
                     <Alert.Heading>Error Loading Events</Alert.Heading>
                     <p>{error}</p>
-                    <Button variant="outline-danger" onClick={fetchEvents}>
+                    <Button variant="outline-danger" onClick={handleRetry}>
                         Try Again
                     </Button>
                 </Alert>
