@@ -159,6 +159,40 @@ const useAuthStore = create(
                     return user?.role === role;
                 },
 
+                // Update user profile with Optimistic Update
+                updateProfile: async (userData) => {
+                    const { user } = get();
+                    const previousUser = user;
+
+                    // 1. Optimistic Update
+                    set({
+                        user: { ...user, ...userData },
+                        loading: true,
+                        error: null
+                    });
+
+                    try {
+                        // 2. Perform API Call
+                        const response = await axiosInstance.put('/auth/profile', userData);
+
+                        if (response.data.success) {
+                            set({
+                                user: response.data.user,
+                                loading: false
+                            });
+                            return { success: true };
+                        }
+                    } catch (error) {
+                        // 3. Rollback on failure
+                        set({
+                            user: previousUser,
+                            loading: false,
+                            error: error.response?.data?.error || 'Failed to update profile'
+                        });
+                        throw error;
+                    }
+                },
+
                 // Clear error
                 clearError: () => set({ error: null }),
             }),
