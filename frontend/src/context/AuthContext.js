@@ -1,9 +1,10 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import axiosInstance from '../api/axiosConfig';
+import React, { createContext, useContext, useEffect } from 'react';
+import useAuthStore from '../stores/authStore';
 
 /**
- * Authentication Context - Manages user authentication state
- * Assignment 14: Simple JWT-based authentication
+ * Authentication Context - Enhanced to use Zustand auth store
+ * Maintains backward compatibility while using centralized state
+ * Assignment 14: JWT-based authentication with token management
  */
 const AuthContext = createContext(null);
 
@@ -16,110 +17,51 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [token, setToken] = useState(null);
-    const [loading, setLoading] = useState(true);
+    // Get all auth state and actions from the store
+    const {
+        user,
+        token,
+        loading,
+        error,
+        isAuthenticated,
+        login,
+        register,
+        logout,
+        checkAuth,
+        clearError,
+    } = useAuthStore();
 
-    // Load auth state from localStorage on mount
+    // Check auth on mount and periodically
     useEffect(() => {
-        const storedToken = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
+        checkAuth();
 
-        if (storedToken && storedUser) {
-            setToken(storedToken);
-            setUser(JSON.parse(storedUser));
-        }
-        setLoading(false);
-    }, []);
+        // Check auth every 5 minutes
+        const interval = setInterval(() => {
+            checkAuth();
+        }, 5 * 60 * 1000);
 
-    /**
-     * Login function
-     */
-    const login = async (email, password) => {
-        try {
-            const response = await axiosInstance.post('/auth/login', { email, password });
+        return () => clearInterval(interval);
+    }, [checkAuth]);
 
-            if (response.data.success) {
-                const { token, user } = response.data;
-
-                // Store in state
-                setToken(token);
-                setUser(user);
-
-                // Persist in localStorage
-                localStorage.setItem('token', token);
-                localStorage.setItem('user', JSON.stringify(user));
-
-                return { success: true };
-            }
-
-            return { success: false, error: 'Login failed' };
-        } catch (error) {
-            return {
-                success: false,
-                error: error.response?.data?.error || 'Login failed. Please try again.'
-            };
-        }
-    };
-
-    /**
-     * Register function
-     */
-    const register = async (name, email, password, phoneNumber, county) => {
-        try {
-            const response = await axiosInstance.post('/auth/register', {
-                name,
-                email,
-                password,
-                phoneNumber,
-                county
-            });
-
-            if (response.data.success) {
-                return { success: true };
-            }
-
-            return { success: false, error: 'Registration failed' };
-        } catch (error) {
-            return {
-                success: false,
-                error: error.response?.data?.error || 'Registration failed. Please try again.'
-            };
-        }
-    };
-
-    /**
-     * Logout function
-     */
-    const logout = () => {
-        setToken(null);
-        setUser(null);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-    };
-
-    /**
-     * Check if user is authenticated
-     */
-    const isAuthenticated = () => {
-        return token !== null && user !== null;
-    };
-
+    // Provide the same API as before for backward compatibility
     const value = {
         user,
         token,
         loading,
+        error,
         login,
         register,
         logout,
-        isAuthenticated
+        isAuthenticated: () => isAuthenticated,
+        clearError,
     };
 
     return (
         <AuthContext.Provider value={value}>
-            {!loading && children}
+            {children}
         </AuthContext.Provider>
     );
 };
 
 export default AuthContext;
+

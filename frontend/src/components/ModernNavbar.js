@@ -1,21 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import useAuthStore from '../stores/authStore';
+import useUIStore from '../stores/uiStore';
 
 /**
- * ModernNavbar Component - Sleek navigation with scroll effects and auth state
- * Assignment 14: Shows login/register or user info based on authentication
+ * ModernNavbar Component - Enhanced with auth store
+ * Sleek navigation with scroll effects and auth state
  */
 function ModernNavbar() {
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
-    const { user, isAuthenticated, logout } = useAuth();
+
+    // Get auth state from store
+    const { user, isAuthenticated, logout } = useAuthStore();
+    const { showSuccess } = useUIStore();
 
     const handleLogout = () => {
         logout();
+        showSuccess('Logged out successfully');
         navigate('/');
+        setMobileMenuOpen(false);
     };
 
     useEffect(() => {
@@ -45,7 +51,7 @@ function ModernNavbar() {
                         <div className="brand-icon">
                             <i className="bi bi-ticket-perforated-fill"></i>
                         </div>
-                        <span>EventKE</span>
+                        <span>Tiketi Afrika</span>
                     </Link>
 
                     <ul className="nav-links d-none d-lg-flex">
@@ -62,7 +68,7 @@ function ModernNavbar() {
                     </ul>
 
                     <div className="d-flex align-items-center gap-3">
-                        {isAuthenticated() ? (
+                        {isAuthenticated ? (
                             <>
                                 <span className="text-white d-none d-md-inline">
                                     <i className="bi bi-person-circle me-2"></i>
@@ -116,6 +122,44 @@ function ModernNavbar() {
                                 {link.label}
                             </Link>
                         ))}
+
+                        <hr className="my-3" style={{ borderColor: 'rgba(255,255,255,0.2)' }} />
+
+                        {isAuthenticated ? (
+                            <>
+                                <div className="mobile-nav-link" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                                    <i className="bi bi-person-circle me-2"></i>
+                                    {user?.name}
+                                </div>
+                                <button
+                                    onClick={handleLogout}
+                                    className="mobile-nav-link w-100 text-start border-0 bg-transparent"
+                                    style={{ color: '#fff' }}
+                                >
+                                    <i className="bi bi-box-arrow-right me-2"></i>
+                                    Logout
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <Link
+                                    to="/login"
+                                    className="mobile-nav-link"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    <i className="bi bi-box-arrow-in-right me-2"></i>
+                                    Login
+                                </Link>
+                                <Link
+                                    to="/register"
+                                    className="mobile-nav-link"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    <i className="bi bi-person-plus me-2"></i>
+                                    Register
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
             )}

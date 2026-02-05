@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
-import { useAuth } from '../context/AuthContext';
+import { Container, Row, Col, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
+import useAuthStore from '../stores/authStore';
+import useUIStore from '../stores/uiStore';
 
 /**
- * Register Page - User registration with Kenyan context
+ * Register Page - Enhanced with auth store and toast notifications
  * Assignment 14: Includes county selection and Kenyan phone validation
  */
 function RegisterPage() {
     const navigate = useNavigate();
-    const { register } = useAuth();
+    const { register, loading, error, clearError } = useAuthStore();
+    const { showSuccess, showError } = useUIStore();
 
     const [formData, setFormData] = useState({
         name: '',
@@ -19,8 +21,7 @@ function RegisterPage() {
         phoneNumber: '',
         county: ''
     });
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [validationError, setValidationError] = useState('');
 
     // Kenyan counties for dropdown
     const kenyanCounties = [
@@ -34,6 +35,13 @@ function RegisterPage() {
             ...formData,
             [e.target.name]: e.target.value
         });
+        // Clear errors when user starts typing
+        if (validationError) {
+            setValidationError('');
+        }
+        if (error) {
+            clearError();
+        }
     };
 
     const validateKenyanPhone = (phone) => {
@@ -43,27 +51,28 @@ function RegisterPage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
+        setValidationError('');
 
         // Validate passwords match
         if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
+            setValidationError('Passwords do not match');
+            showError('Passwords do not match');
             return;
         }
 
         // Validate password length
         if (formData.password.length < 6) {
-            setError('Password must be at least 6 characters long');
+            setValidationError('Password must be at least 6 characters long');
+            showError('Password must be at least 6 characters long');
             return;
         }
 
         // Validate Kenyan phone number
         if (!validateKenyanPhone(formData.phoneNumber)) {
-            setError('Invalid Kenyan phone number. Must start with +254 or 07/01');
+            setValidationError('Invalid Kenyan phone number. Must start with +254 or 07/01');
+            showError('Invalid Kenyan phone number format');
             return;
         }
-
-        setLoading(true);
 
         const result = await register(
             formData.name,
@@ -74,13 +83,14 @@ function RegisterPage() {
         );
 
         if (result.success) {
-            navigate('/login', { state: { message: 'Registration successful! Please login.' } });
+            showSuccess('Registration successful! Please login to continue.');
+            navigate('/login');
         } else {
-            setError(result.error);
+            showError(result.error || 'Registration failed. Please try again.');
         }
-
-        setLoading(false);
     };
+
+    const displayError = validationError || error;
 
     return (
         <div style={{ paddingTop: '120px', paddingBottom: '60px', background: '#f8fafc', minHeight: '100vh' }}>
@@ -89,14 +99,34 @@ function RegisterPage() {
                     <Col md={8} lg={6}>
                         <Card className="shadow-sm border-0" style={{ borderRadius: '16px' }}>
                             <Card.Body className="p-5">
-                                <h2 className="text-center mb-4">Create Account</h2>
-                                <p className="text-center text-muted mb-4">Join Tiketi Afrika</p>
+                                <div className="text-center mb-4">
+                                    <div className="mb-3">
+                                        <i className="bi bi-person-plus-fill text-primary" style={{ fontSize: '3rem' }}></i>
+                                    </div>
+                                    <h2 className="mb-2">Create Account</h2>
+                                    <p className="text-muted">Join Tiketi Afrika</p>
+                                </div>
 
-                                {error && <Alert variant="danger">{error}</Alert>}
+                                {displayError && (
+                                    <Alert
+                                        variant="danger"
+                                        dismissible
+                                        onClose={() => {
+                                            setValidationError('');
+                                            clearError();
+                                        }}
+                                    >
+                                        <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                                        {displayError}
+                                    </Alert>
+                                )}
 
                                 <Form onSubmit={handleSubmit}>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Full Name *</Form.Label>
+                                        <Form.Label>
+                                            <i className="bi bi-person me-2"></i>
+                                            Full Name *
+                                        </Form.Label>
                                         <Form.Control
                                             type="text"
                                             name="name"
@@ -104,11 +134,15 @@ function RegisterPage() {
                                             onChange={handleChange}
                                             placeholder="John Kamau"
                                             required
+                                            disabled={loading}
                                         />
                                     </Form.Group>
 
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Email Address *</Form.Label>
+                                        <Form.Label>
+                                            <i className="bi bi-envelope me-2"></i>
+                                            Email Address *
+                                        </Form.Label>
                                         <Form.Control
                                             type="email"
                                             name="email"
@@ -116,13 +150,17 @@ function RegisterPage() {
                                             onChange={handleChange}
                                             placeholder="your.email@example.com"
                                             required
+                                            disabled={loading}
                                         />
                                     </Form.Group>
 
                                     <Row>
                                         <Col md={6}>
                                             <Form.Group className="mb-3">
-                                                <Form.Label>Password *</Form.Label>
+                                                <Form.Label>
+                                                    <i className="bi bi-lock me-2"></i>
+                                                    Password *
+                                                </Form.Label>
                                                 <Form.Control
                                                     type="password"
                                                     name="password"
@@ -130,12 +168,16 @@ function RegisterPage() {
                                                     onChange={handleChange}
                                                     placeholder="Min. 6 characters"
                                                     required
+                                                    disabled={loading}
                                                 />
                                             </Form.Group>
                                         </Col>
                                         <Col md={6}>
                                             <Form.Group className="mb-3">
-                                                <Form.Label>Confirm Password *</Form.Label>
+                                                <Form.Label>
+                                                    <i className="bi bi-lock-fill me-2"></i>
+                                                    Confirm Password *
+                                                </Form.Label>
                                                 <Form.Control
                                                     type="password"
                                                     name="confirmPassword"
@@ -143,13 +185,17 @@ function RegisterPage() {
                                                     onChange={handleChange}
                                                     placeholder="Re-enter password"
                                                     required
+                                                    disabled={loading}
                                                 />
                                             </Form.Group>
                                         </Col>
                                     </Row>
 
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Phone Number * (Kenyan)</Form.Label>
+                                        <Form.Label>
+                                            <i className="bi bi-phone me-2"></i>
+                                            Phone Number * (Kenyan)
+                                        </Form.Label>
                                         <Form.Control
                                             type="tel"
                                             name="phoneNumber"
@@ -157,6 +203,7 @@ function RegisterPage() {
                                             onChange={handleChange}
                                             placeholder="+254712345678 or 0712345678"
                                             required
+                                            disabled={loading}
                                         />
                                         <Form.Text className="text-muted">
                                             Format: +254712345678 or 0712345678
@@ -164,12 +211,16 @@ function RegisterPage() {
                                     </Form.Group>
 
                                     <Form.Group className="mb-4">
-                                        <Form.Label>County *</Form.Label>
+                                        <Form.Label>
+                                            <i className="bi bi-geo-alt me-2"></i>
+                                            County *
+                                        </Form.Label>
                                         <Form.Select
                                             name="county"
                                             value={formData.county}
                                             onChange={handleChange}
                                             required
+                                            disabled={loading}
                                         >
                                             <option value="">Select your county</option>
                                             {kenyanCounties.map(county => (
@@ -185,7 +236,23 @@ function RegisterPage() {
                                         disabled={loading}
                                         size="lg"
                                     >
-                                        {loading ? 'Creating Account...' : 'Register'}
+                                        {loading ? (
+                                            <>
+                                                <Spinner
+                                                    as="span"
+                                                    animation="border"
+                                                    size="sm"
+                                                    role="status"
+                                                    className="me-2"
+                                                />
+                                                Creating Account...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <i className="bi bi-person-plus me-2"></i>
+                                                Register
+                                            </>
+                                        )}
                                     </Button>
 
                                     <div className="text-center">
