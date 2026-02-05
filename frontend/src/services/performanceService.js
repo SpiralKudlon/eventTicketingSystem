@@ -1,9 +1,9 @@
-import { onCLS, onFID, onLCP, onTTFB } from 'web-vitals';
+import { onCLS, onINP, onLCP, onTTFB } from 'web-vitals';
 import analytics from './analyticsService';
 
 const reportHandler = (metric) => {
     // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV !== 'production') {
         console.log(metric);
     }
 
@@ -13,7 +13,7 @@ const reportHandler = (metric) => {
 
 const reportWebVitals = () => {
     onCLS(reportHandler);
-    onFID(reportHandler);
+    onINP(reportHandler);
     onLCP(reportHandler);
     onTTFB(reportHandler);
 };
