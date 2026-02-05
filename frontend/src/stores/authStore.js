@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import axiosInstance from '../api/axiosConfig';
+import analytics from '../services/analyticsService';
 
 /**
  * Auth Store - Enhanced authentication state management
@@ -23,6 +24,7 @@ const useAuthStore = create(
                 // Actions
                 login: async (email, password) => {
                     set({ loading: true, error: null });
+                    analytics.trackEvent('Auth', 'Login Attempt', email);
                     try {
                         const response = await axiosInstance.post('/auth/login', {
                             email,
@@ -45,20 +47,27 @@ const useAuthStore = create(
                             // Set axios default header
                             axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
+                            // Identify user
+                            analytics.identifyUser(user.id, user.role);
+                            analytics.trackEvent('Auth', 'Login Success');
+
                             return { success: true };
                         }
 
                         set({ loading: false, error: 'Login failed' });
+                        analytics.trackEvent('Auth', 'Login Failed', 'Invalid credentials');
                         return { success: false, error: 'Login failed' };
                     } catch (error) {
                         const errorMessage = error.response?.data?.error || 'Login failed. Please try again.';
                         set({ loading: false, error: errorMessage });
+                        analytics.trackEvent('Auth', 'Login Error', errorMessage);
                         return { success: false, error: errorMessage };
                     }
                 },
 
                 register: async (name, email, password, phoneNumber, county) => {
                     set({ loading: true, error: null });
+                    analytics.trackEvent('Auth', 'Register Attempt');
                     try {
                         const response = await axiosInstance.post('/auth/register', {
                             name,
@@ -70,14 +79,17 @@ const useAuthStore = create(
 
                         if (response.data.success) {
                             set({ loading: false, error: null });
+                            analytics.trackEvent('Auth', 'Register Success');
                             return { success: true };
                         }
 
                         set({ loading: false, error: 'Registration failed' });
+                        analytics.trackEvent('Auth', 'Register Failed');
                         return { success: false, error: 'Registration failed' };
                     } catch (error) {
                         const errorMessage = error.response?.data?.error || 'Registration failed. Please try again.';
                         set({ loading: false, error: errorMessage });
+                        analytics.trackEvent('Auth', 'Register Error', errorMessage);
                         return { success: false, error: errorMessage };
                     }
                 },
@@ -85,6 +97,7 @@ const useAuthStore = create(
                 logout: () => {
                     // Clear axios header
                     delete axiosInstance.defaults.headers.common['Authorization'];
+                    analytics.trackEvent('Auth', 'Logout');
 
                     set({
                         user: null,

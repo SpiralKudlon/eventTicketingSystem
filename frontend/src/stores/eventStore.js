@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import axiosInstance from '../api/axiosConfig';
+import analytics from '../services/analyticsService';
 
 /**
  * Event Store - Centralized state management for events
@@ -36,11 +37,13 @@ const useEventStore = create(
                         const cacheAge = Date.now() - lastFetched;
                         if (cacheAge < CACHE_DURATION) {
                             console.log('Using cached events');
+                            analytics.trackEvent('Events', 'Fetch Cached');
                             return;
                         }
                     }
 
                     set({ loading: true, error: null });
+                    analytics.trackEvent('Events', 'Fetch Start');
                     try {
                         const response = await axiosInstance.get('/events');
                         set({
@@ -48,11 +51,13 @@ const useEventStore = create(
                             loading: false,
                             lastFetched: Date.now(),
                         });
+                        analytics.trackEvent('Events', 'Fetch Success', null, response.data.length);
                     } catch (error) {
                         set({
                             error: 'Failed to load events. Please try again.',
                             loading: false,
                         });
+                        analytics.trackEvent('Events', 'Fetch Error', error.message);
                         console.error('Error fetching events:', error);
                     }
                 },
@@ -167,6 +172,8 @@ const useEventStore = create(
                     const { events } = get();
                     const { eventId, quantity } = ticketData;
 
+                    analytics.trackEvent('Ticket', 'Purchase Start', `Event: ${eventId}`, quantity);
+
                     // 1. Optimistic Update
                     const previousEvents = [...events];
                     set({
@@ -181,14 +188,13 @@ const useEventStore = create(
                         // 2. Perform API Call
                         const response = await axiosInstance.post('/ticket/purchase', ticketData);
 
-                        // 3. Success - Invalidate specific event or refresh if needed
-                        // For now, we trust our calculation, but we could re-fetch to be sure
-                        // set((state) => ({ events: state.events.map(...) })) // update with server response if it returns updated event
-
+                        // 3. Success
+                        analytics.trackEvent('Ticket', 'Purchase Success', `Event: ${eventId}`, response.data.totalPrice);
                         return response.data;
                     } catch (error) {
                         // 4. Rollback on Failure
                         set({ events: previousEvents });
+                        analytics.trackEvent('Ticket', 'Purchase Failed', error.message);
                         console.error('Purchase failed, rolling back:', error);
                         throw error;
                     }

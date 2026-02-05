@@ -1,10 +1,16 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { Spinner } from 'react-bootstrap';
 import './styles/modern-theme.css';
 import './styles/additional-styles.css';
+
+// Monitoring
+import errorService from './services/errorService';
+import analytics from './services/analyticsService';
+import reportWebVitals from './services/performanceService';
+import RouteTracker from './components/RouteTracker';
 
 // Context
 import { AuthProvider } from './context/AuthContext';
@@ -15,7 +21,11 @@ import ModernNavbar from './components/ModernNavbar';
 import ModernFooter from './components/ModernFooter';
 import ToastNotification from './components/ToastNotification';
 
-// Lazy Loaded Components
+// Initialize Global Error Handlers
+errorService.initGlobalHandlers();
+reportWebVitals();
+
+// ... (Lazy Loaded Components remain same)
 const HomePage = lazy(() => import('./components/HomePage'));
 const TicketCheckout = lazy(() => import('./components/TicketCheckout'));
 const TicketConfirmation = lazy(() => import('./components/TicketConfirmation'));
@@ -37,9 +47,14 @@ const PageLoader = () => (
 );
 
 function App() {
+    useEffect(() => {
+        analytics.init();
+    }, []);
+
     return (
         <AuthProvider>
             <Router>
+                <RouteTracker />
                 <SkipLink />
                 <ToastNotification />
                 <div className="App">
